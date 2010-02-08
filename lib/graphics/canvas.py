@@ -20,6 +20,9 @@ class Canvas(gtk.DrawingArea):
       self.connect("expose-event", self.expose)
 
       self.set_size(400, 300)
+      self.image = cairo.ImageSurface.create_from_png("examples/flower.png")
+      self.ALPHA_PATTERN = cairo.SurfacePattern(cairo.ImageSurface.create_from_png("pixmaps/alpha-pattern.png"))
+      self.ALPHA_PATTERN.set_extend(cairo.EXTEND_REPEAT)
 
 
    def reset(self, context):
@@ -69,6 +72,9 @@ class Canvas(gtk.DrawingArea):
 
 
    def draw(self, context):
+      self.reset(context)
+      # context.set_source_surface(self.image)
+      # context.paint()
 
       # Painting circle
       context.arc(50, 50, 300, 0, 2.0 * math.pi)
@@ -105,6 +111,8 @@ class Canvas(gtk.DrawingArea):
 
    def __draw_background(self, context):
       context.rectangle(0, 0, self.width, self.height)
-      context.set_source_rgb(1, 1, 1)
-      context.fill()
+      #context.set_source_rgb(1, 1, 1)
+      #context.fill()
+      context.set_source(self.ALPHA_PATTERN)
+      context.paint()
 
