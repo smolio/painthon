@@ -4,25 +4,43 @@
 import pygtk
 pygtk.require("2.0")
 import gtk
+import gettext
 import math
 import cairo
 from lib.misc.hsvgenerator import HSVGenerator
 from lib.graphics.colorcell import ColorCell
 from lib.graphics.fancycanvas import FancyCanvas
 from lib.graphics.rgbacolor import RGBAColor
+from lib.tools.figures import *
+from lib.tools.generic import *
+
+_ = gettext.gettext
  
 
 class Painthon():
 
-   def __init__(self):
+   def __init__(self, image_filename=None):
       '''Starting...'''
       builder = gtk.Builder()
       builder.add_from_file("painthon.xml")
       builder.connect_signals(self)
 
+      # Initialize canvas
+      # TODO: pass image reference...
+      viewport = builder.get_object("viewport-for-canvas")
+      self.CANVAS = FancyCanvas()
+      viewport.add(self.CANVAS)
+
+      # Defining tools
+      self.TOOLS = {"btn-tool-draw-rectangle" : RectangleTool(self.CANVAS),
+                    "btn-tool-draw-ellipse"   : EllipseTool(self.CANVAS) }
+
       # Set the first tool to use...
-      self.current_tool = builder.get_object("btn-tool-free-select")
-      self.current_tool.set_active(True)
+      # TODO: This is the one ;-)
+      #self.active_tool_button = builder.get_object("btn-tool-free-select")
+      self.active_tool_button = builder.get_object("btn-tool-draw-rectangle")
+      self.active_tool_button.set_active(True)
+      self.CANVAS.set_active_tool(self.TOOLS[self.active_tool_button.get_name()])
 
       # Get the window properly
       self.window = builder.get_object("main-window")
@@ -50,13 +68,16 @@ class Painthon():
       a2 = builder.get_object("secondary-color-alpha")
       a2.set_value(a2.get_value())
 
-      # Initialize canvas
-      viewport = builder.get_object("viewport-for-canvas")
-      self.canvas = FancyCanvas()
-      viewport.add(self.canvas)
+      # Setting filename
+      self.filename = _("unknown")
+      self.update_title()
 
       # Show the window
       self.window.show_all()
+
+
+   def update_title(self):
+      self.window.set_title("*" + self.filename + " - Painthon")
 
 
    def __init_colors(self, colorsgrid):
@@ -108,53 +129,57 @@ class Painthon():
       c = widget.get_color()
       if event.button == 1:
          c.set_alpha(self.primary.get_color().get_alpha())
-         self.primary.set_color(c)
+         self.__set_primary_color_to(c)
       elif event.button == 3:
          c.set_alpha(self.secondary.get_color().get_alpha())
-         self.secondary.set_color(c)
+         self.__set_secondary_color_to(c)
 
 
    def change_tool_gui(self, newtool, data=None):
       if newtool.get_active():
-          prevtool = self.current_tool
+          prevtool = self.active_tool_button
           if newtool != prevtool:
-              self.current_tool = newtool
+              self.active_tool_button = newtool
               prevtool.set_active(False)
               self.change_tool(newtool)
 
       else:
-          if newtool == self.current_tool:
+          if newtool == self.active_tool_button:
               newtool.set_active(True);
 
 
    def change_tool(self, tool):
-      print("New tool selected: "+tool.get_name())
-      # TODO: delete me
-      w = self.canvas.get_width()
-      h = self.canvas.get_height()
-      if tool.get_name() == "btn-tool-draw-ellipse":
-         w -= 10
-         h -= 10
-      if tool.get_name() == "btn-tool-draw-rounded-rectangle":
-         w += 10
-         h += 10
-      self.canvas.set_size(max(w,10), max(h,10))
+      self.CANVAS.set_active_tool(self.TOOLS[tool.get_name()])
 
 
    def change_primary_alpha(self, slider):
       c = self.primary.get_color()
-      print slider.get_value()
+      #TODO: delete me
+      #print slider.get_value()
       value = slider.get_value()/100
-      print value
+      #TODO: delete me
+      #print value
       c.set_alpha(value)
-      self.primary.set_color(c)
+      self.__set_primary_color_to(c)
 
 
    def change_secondary_alpha(self, slider):
       c = self.secondary.get_color()
       value = slider.get_value()/100
       c.set_alpha(value)
+      self.__set_secondary_color_to(c)
+
+
+   def __set_primary_color_to(self, c):
+      self.primary.set_color(c)
+      for tool in self.TOOLS.values():
+         tool.set_primary_color(c)
+
+
+   def __set_secondary_color_to(self, c):
       self.secondary.set_color(c)
+      for tool in self.TOOLS.values():
+         tool.set_secondary_color(c)
 
 
    def new(self, widget):
@@ -182,6 +207,14 @@ class Painthon():
 
 
    def paste(self, widget):
+      print widget.get_name()
+
+
+   def redo(self, widget):
+      print widget.get_name()
+
+
+   def undo(self, widget):
       print widget.get_name()
 
 
