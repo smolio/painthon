@@ -13,10 +13,6 @@ class FancyCanvas(Canvas):
       # Initializing superclass
       super(FancyCanvas, self).__init__()
 
-      # Registering events
-      self.add_events(gtk.gdk.POINTER_MOTION_MASK)
-      self.connect("motion-notify-event", self.motion_event)
-
       # Resize Square Size
       self.RSS = 5
       # Margin (to draw shadows and resize squares)
@@ -35,11 +31,9 @@ class FancyCanvas(Canvas):
       self.DECORATIONS_COLOR = aux.get_style().bg[gtk.STATE_SELECTED]
 
       # Basic Tools
-      self.DUMMY_TOOL = RectangleTool(self)
       self.CANVAS_B_SCALER = BothScalingTool(self)
       self.CANVAS_H_SCALER = HorizontalScalingTool(self)
       self.CANVAS_V_SCALER = VerticalScalingTool(self)
-      self.active_tool = self.DUMMY_TOOL
 
       # Useful constants
       self.RIGHT_SCALING_POINT = 0
@@ -47,18 +41,14 @@ class FancyCanvas(Canvas):
       self.BOTTOM_SCALING_POINT = 2
       self.SCALING_SIDE_POINTS_MIN_SIZE = 20
 
+      # Previous tool (to recover from a rescale)
+      self.previous_tool = self.active_tool
+
 
    def set_size(self, width, height):
       self.width = max(width, 1)
       self.height = max(height, 1)
       self.set_size_request(self.width + self.MARGIN, self.height + self.MARGIN)
-
-
-   def drag_event(self, widget, event):
-      context = widget.window.cairo_create()
-      rect = gtk.gdk.Rectangle(0, 0, self.width, self.height)
-      self.active_tool.drag(event.x, event.y)
-      self.window.invalidate_rect(rect, True)
 
 
    def expose(self, widget, event):
@@ -75,6 +65,8 @@ class FancyCanvas(Canvas):
 
 
    def button_pressed(self, widget, event):
+      self.previous_tool = self.active_tool
+
       # When the click is outside the canvas, a scaling point might have been
       # clicked.
       if event.x >= self.width or event.y >= self.height:
@@ -131,9 +123,8 @@ class FancyCanvas(Canvas):
 
 
    def button_released(self, widget, event):
+      self.active_tool = self.previous_tool
       super(FancyCanvas, self).button_released(widget, event)
-      self.active_tool = self.DUMMY_TOOL
-      self.active_tool.select()
 
 
    def motion_event(self, widget, event):
@@ -144,7 +135,8 @@ class FancyCanvas(Canvas):
       elif self.__over_scaling_point(self.BOTTOM_SCALING_POINT, event):
          self.CANVAS_V_SCALER.select()
       else:
-         self.active_tool.select()
+         super(FancyCanvas, self).motion_event(widget, event)
+
 
    def __draw_shadows(self, context):
       # Shadow displacements

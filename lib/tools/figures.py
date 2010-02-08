@@ -1,30 +1,35 @@
 import cairo
-from generic import Tool
+import math
+from generic import DragAndDropTool
 
-class RectangleTool(Tool):
-   initial_x = 0
-   initial_y = 0
-   final_x = 0
-   final_y = 0
-
-   def begin(self, x, y):
-      self.initial_x = x
-      self.initial_y = y
-      self.final_x = x
-      self.final_y = y
-
-   def end(self, x, y):
-      self.final_x = x
-      self.final_y = y
+class RectangleTool(DragAndDropTool):
 
    def draw(self, context):
       w = self.final_x - self.initial_x
       h = self.final_y - self.initial_y
       context.rectangle(self.initial_x, self.initial_y, w, h)
-      context.set_source_rgb(0, 0, 1)
+      self.use_secondary_color(context)
       context.fill_preserve()
-      context.set_source_rgb(0, 0, 0)
+      self.use_primary_color(context)
       context.stroke()
 
-   def drag(self, x, y):
-      self.end(x, y)
+
+class EllipseTool(DragAndDropTool):
+
+   def draw(self, context):
+      w = self.final_x - self.initial_x
+      h = self.final_y - self.initial_y
+      context.save()
+      context.translate(self.initial_x + w/2., self.initial_y + h/2.)
+      try:
+         # This statements throw an exception, but they do not affect the tool's
+         # behaviour. Thus, I hide them from the user.
+         context.scale(w/2., h/2.)
+         context.arc(0., 0., 1., 0., 2 * math.pi)
+         self.use_secondary_color(context)
+         context.fill_preserve()
+         context.restore()
+         self.use_primary_color(context)
+         context.stroke()
+      except cairo.Error:
+         pass
