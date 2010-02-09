@@ -16,14 +16,11 @@ from lib.tools.generic import *
 
 _ = gettext.gettext
  
-
 class Painthon():
 
    def __init__(self, image_filename=None):
-      '''Starting...'''
       builder = gtk.Builder()
       builder.add_from_file("painthon.xml")
-      builder.connect_signals(self)
 
       # Initialize canvas
       # TODO: pass image reference...
@@ -33,6 +30,7 @@ class Painthon():
 
       # Defining tools
       self.TOOLS = {"btn-tool-draw-rectangle" : RectangleTool(self.CANVAS),
+                    "btn-tool-draw-rounded-rectangle" : RoundedRectangleTool(self.CANVAS),
                     "btn-tool-draw-ellipse"   : EllipseTool(self.CANVAS) }
 
       # Set the first tool to use...
@@ -65,12 +63,17 @@ class Painthon():
       # Fix alpha sliders
       a1 = builder.get_object("primary-color-alpha")
       a1.set_value(a1.get_value())
+      self.MAX_ALPHA_1 = a1.get_value()
       a2 = builder.get_object("secondary-color-alpha")
       a2.set_value(a2.get_value())
+      self.MAX_ALPHA_2 = a2.get_value()
 
       # Setting filename
       self.filename = _("unknown")
       self.update_title()
+
+      # Connecting signals properly...
+      builder.connect_signals(self)
 
       # Show the window
       self.window.show_all()
@@ -154,18 +157,14 @@ class Painthon():
 
    def change_primary_alpha(self, slider):
       c = self.primary.get_color()
-      #TODO: delete me
-      #print slider.get_value()
-      value = slider.get_value()/100
-      #TODO: delete me
-      #print value
+      value = slider.get_value()/self.MAX_ALPHA_1
       c.set_alpha(value)
       self.__set_primary_color_to(c)
 
 
    def change_secondary_alpha(self, slider):
       c = self.secondary.get_color()
-      value = slider.get_value()/100
+      value = slider.get_value()/self.MAX_ALPHA_2
       c.set_alpha(value)
       self.__set_secondary_color_to(c)
 

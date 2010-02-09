@@ -60,7 +60,7 @@ class ColorCell(gtk.DrawingArea):
 
 
    def get_color(self):
-      return self.color
+      return self.color.copy()
 
 
    def modify_color(self, color):

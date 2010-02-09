@@ -62,6 +62,10 @@ class RGBAColor:
       return "(" + str(self.red) + ", " + str(self.green) + ", " + str(self.blue) + ", " + str(self.alpha) + ")"
 
 
+   def copy(self):
+      return RGBAColor(self.red, self.green, self.blue, self.alpha)
+
+
    def create_from_gtk_color(gtk_color):
       string = gtk_color.to_string()
 

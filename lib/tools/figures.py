@@ -14,6 +14,22 @@ class RectangleTool(DragAndDropTool):
       context.stroke()
 
 
+class RoundedRectangleTool(DragAndDropTool):
+
+   def draw(self, context):
+      w = self.final_x - self.initial_x
+      h = self.final_y - self.initial_y
+      context.rectangle(self.initial_x, self.initial_y, w, h)
+      self.use_secondary_color(context)
+      context.fill_preserve()
+      self.use_primary_color(context)
+      context.save()
+      context.set_line_width(50)
+      context.set_line_join(cairo.LINE_JOIN_ROUND)
+      context.stroke()
+      context.restore()
+
+
 class EllipseTool(DragAndDropTool):
 
    def draw(self, context):
