@@ -66,6 +66,11 @@ class RGBAColor:
       return RGBAColor(self.red, self.green, self.blue, self.alpha)
 
 
+   def to_gtk_color(self):
+      # TODO: use proper values
+      return gtk.gdk.color_parse("#f00")
+
+
    def create_from_gtk_color(gtk_color):
       string = gtk_color.to_string()
 

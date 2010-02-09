@@ -49,6 +49,11 @@ class ColorCell(gtk.DrawingArea):
       context.paint()
 
 
+   def swap_buffers(self):
+      rect = gtk.gdk.Rectangle(0, 0, self.WIDTH, self.HEIGHT)
+      self.window.invalidate_rect(rect, True)
+
+      
    def set_color(self, color):
       self.color = color
 
@@ -67,25 +72,14 @@ class ColorCell(gtk.DrawingArea):
       csd = gtk.ColorSelectionDialog("Choose a color")
       csd.set_modal(True)
       cs = csd.get_color_selection()
-      #cs.set_property("current-color", color.get_style().bg[gtk.STATE_NORMAL])
+      cs.set_property("current-color", self.color.to_gtk_color())
       ok = csd.run()
       if ok == gtk.RESPONSE_OK:
-         self.set_color(RGBAColor.create_from_gtk_color(cs.get_current_color))
+         self.set_color(RGBAColor.create_from_gtk_color(cs.get_current_color()))
       csd.destroy()
 
 
    def clicked(self, widget, event):
-     #which = 0
-     #if event.button == 1 or color == self.primary:
-     #   which = Painthon.PRIMARY_COLOR
-     #elif event.button == 3 or color == self.secondary:
-     #   which = Painthon.SECONDARY_COLOR
-
-     #if event.type == gtk.gdk.BUTTON_PRESS:
-     #   self.set_color(color, which)
-     #elif event.type == gtk.gdk._2BUTTON_PRESS:
-     #   self.modify_color(color, which)
-
      if event.type == gtk.gdk._2BUTTON_PRESS:
         self.modify_color(widget)
 
