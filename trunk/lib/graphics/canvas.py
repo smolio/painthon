@@ -4,9 +4,13 @@ import math
 from lib.tools.generic import *
 
 class Canvas(gtk.DrawingArea):
+   TRANSPARENT_IMAGE = 0
+   OPAQUE_IMAGE = 1
+
    DEFAULT_CURSOR = gtk.gdk.Cursor(gtk.gdk.ARROW)
    active_tool = None
    drawing = False
+   printing_tool = False
 
    def __init__(self):
       # Initializing superclass
@@ -92,8 +96,10 @@ class Canvas(gtk.DrawingArea):
    def print_tool(self):
       aux = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.width, self.height)
       context = cairo.Context(aux)
+      self.printing_tool = True
       self.draw(context)
       self.CANVAS = aux
+      self.printing_tool = False
 
 
    def draw(self, context):
@@ -101,21 +107,19 @@ class Canvas(gtk.DrawingArea):
       self.reset(context)
 
       # Drawing the background
-      self.__draw_background(context)
+      if not self.printing_tool:
+         self.__draw_background(context)
 
       # Draw the result
-      self.draw_image(context)
-      if self.drawing:
-         self.active_tool.draw(context)
-
-
-   def draw_image(self, context):
       self.reset(context)
 
       source = context.get_source()
       context.set_source_surface(self.CANVAS)
       context.paint()
       context.set_source(source)
+
+      if self.drawing:
+         self.active_tool.draw(context)
 
 
    def __draw_background(self, context):
@@ -129,3 +133,17 @@ class Canvas(gtk.DrawingArea):
    def swap_buffers(self):
       rect = gtk.gdk.Rectangle(0, 0, self.width, self.height)
       self.window.invalidate_rect(rect, True)
+
+
+   def get_image(self):
+      return self.CANVAS
+
+
+   def set_image(self, surface):
+      self.CANVAS = surface
+      self.set_size(surface.get_width(), surface.get_height())
+
+
+   def set_image_type(self, image_type):
+      # TODO: specify image type (transparent or not)
+      pass

@@ -7,10 +7,14 @@ import gtk
 import gettext
 import math
 import cairo
+import os
+import sys
+
 from lib.misc.hsvgenerator import HSVGenerator
 from lib.graphics.colorcell import ColorCell
 from lib.graphics.fancycanvas import FancyCanvas
 from lib.graphics.rgbacolor import RGBAColor
+from lib.io.generic import ImageFile
 from lib.tools.figures import *
 from lib.tools.generic import *
 
@@ -18,15 +22,31 @@ _ = gettext.gettext
  
 class Painthon():
 
-   def __init__(self, image_filename=None):
+   def __init__(self, path, image_filename=None):
       builder = gtk.Builder()
       builder.add_from_file("painthon.xml")
 
+      # Get the window properly
+      self.window = builder.get_object("main-window")
+
+      # Reader and Writer Tools
+      self.READWRITE = ImageFile()
+
       # Initialize canvas
-      # TODO: pass image reference...
       viewport = builder.get_object("viewport-for-canvas")
       self.CANVAS = FancyCanvas()
       viewport.add(self.CANVAS)
+
+      # Load image information
+      self.is_modified = False
+      if image_filename != None:
+         info = self.READWRITE.read(os.path.abspath(image_filename))
+         self.__set_current_info(info)
+      else:
+         self.filename = _("unknown")
+         self.path = path
+         self.update_title()
+
 
       # Defining tools
       self.TOOLS = {"btn-tool-draw-rectangle" : RectangleTool(self.CANVAS),
@@ -34,14 +54,11 @@ class Painthon():
                     "btn-tool-draw-ellipse"   : EllipseTool(self.CANVAS) }
 
       # Set the first tool to use...
-      # TODO: This is the one ;-)
+      # TODO: select the proper default tool
       #self.active_tool_button = builder.get_object("btn-tool-free-select")
       self.active_tool_button = builder.get_object("btn-tool-draw-rectangle")
       self.active_tool_button.set_active(True)
       self.CANVAS.set_active_tool(self.TOOLS[self.active_tool_button.get_name()])
-
-      # Get the window properly
-      self.window = builder.get_object("main-window")
 
       # Get the toolbar and set it not to show text
       self.toolbar = builder.get_object("toolbar")
@@ -68,10 +85,6 @@ class Painthon():
       a2.set_value(a2.get_value())
       self.MAX_ALPHA_2 = a2.get_value()
 
-      # Setting filename
-      self.filename = _("unknown")
-      self.update_title()
-
       # Connecting signals properly...
       builder.connect_signals(self)
 
@@ -80,7 +93,10 @@ class Painthon():
 
 
    def update_title(self):
-      self.window.set_title("*" + self.filename + " - Painthon")
+      if self.is_modified:
+         self.window.set_title("*" + self.filename + " - Painthon")
+      else:
+         self.window.set_title(self.filename + " - Painthon")
 
 
    def __init_colors(self, colorsgrid):
@@ -186,15 +202,31 @@ class Painthon():
 
 
    def open(self, widget):
-      print widget.get_name()
+      info = self.READWRITE.open(self.path + os.sep + self.filename)
+      self.__set_current_info(info)
 
 
    def save(self, widget):
-      print widget.get_name()
+      canonical_filename = self.READWRITE.save(self.CANVAS.get_image(), self.path, self.filename)
+      self.__fix_image_info(canonical_filename)
 
 
    def save_as(self, widget):
-      print widget.get_name()
+      canonical_filename = self.READWRITE.save_as(self.CANVAS.get_image(), self.path, self.filename)
+      self.__fix_image_info(canonical_filename)
+
+
+   def __set_current_info(self, image_info):
+      canonical_filename = image_info[0]
+      self.CANVAS.set_image(image_info[1])
+      self.CANVAS.set_image_type(image_info[2])
+      self.__fix_image_info(canonical_filename)
+
+
+   def __fix_image_info(self, canonical_filename):
+      self.filename = os.path.basename(canonical_filename)
+      self.path = os.path.dirname(canonical_filename)
+      self.update_title()
 
 
    def cut(self, widget):
@@ -219,6 +251,10 @@ class Painthon():
 
 
 if __name__ == "__main__":
-   app = Painthon()
+   filename = None
+   if len(sys.argv) == 2:
+      filename = sys.argv[1]
+
+   app = Painthon(os.environ['HOME'], filename)
 
    gtk.main()
