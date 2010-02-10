@@ -43,9 +43,9 @@ class Painthon():
          info = self.READWRITE.read(os.path.abspath(image_filename))
          self.__set_current_info(info)
       else:
-         self.filename = _("unknown")
-         self.path = path
+         self.filename = None
          self.update_title()
+         self.path = path
 
 
       # Defining tools
@@ -93,10 +93,15 @@ class Painthon():
 
 
    def update_title(self):
-      if self.is_modified:
-         self.window.set_title("*" + self.filename + " - Painthon")
+      if self.filename == None:
+         name = _("unknown")
       else:
-         self.window.set_title(self.filename + " - Painthon")
+         name = self.filename
+
+      if self.is_modified:
+         self.window.set_title("*" + name + " - Painthon")
+      else:
+         self.window.set_title(name + " - Painthon")
 
 
    def __init_colors(self, colorsgrid):
@@ -202,7 +207,7 @@ class Painthon():
 
 
    def open(self, widget):
-      info = self.READWRITE.open(self.path + os.sep + self.filename)
+      info = self.READWRITE.open(self.path)
       self.__set_current_info(info)
 
 
