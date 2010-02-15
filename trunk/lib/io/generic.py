@@ -2,7 +2,10 @@ import cairo
 import gtk
 import os
 import gettext
-from lib.graphics.canvas import Canvas
+import imghdr
+
+from readwrite import PNGReaderWriter
+from readwrite import JPEGReaderWriter
 
 _ = gettext.gettext
 
@@ -11,7 +14,8 @@ class ImageFile:
    def __init__(self):
       png = PNGReaderWriter()
 
-      self.TOOLS = { png.get_filter() : png }
+      self.TOOLS_BY_FILTER = { png.get_filter() : png }
+      self.TOOLS_BY_IMGTYPE = { png.get_imgtype() : png }
       self.current_tool = None
 
    def open(self, path):
@@ -22,7 +26,7 @@ class ImageFile:
             gtk.STOCK_OPEN, gtk.RESPONSE_OK)
          )
 
-      for tool in self.TOOLS.values():
+      for tool in self.TOOLS_BY_FILTER.values():
          file_dialog.add_filter(tool.get_filter())
 
       file_dialog.set_title(_("Open Image"))
@@ -30,7 +34,7 @@ class ImageFile:
 
       response = file_dialog.run()
       if response == gtk.RESPONSE_OK:
-         self.current_tool = self.TOOLS[file_dialog.get_filter()]
+         self.current_tool = self.TOOLS_BY_FILTER[file_dialog.get_filter()]
          result = self.current_tool.read(file_dialog.get_filename())
       else:
          result = None
@@ -62,12 +66,12 @@ class ImageFile:
       if filename != None:
          file_dialog.set_filename(filename)
 
-      for tool in self.TOOLS.values():
+      for tool in self.TOOLS_BY_FILTER.values():
          file_dialog.add_filter(tool.get_filter())
 
       response = file_dialog.run()
       if response == gtk.RESPONSE_OK:
-         self.current_tool = self.TOOLS[file_dialog.get_filter()]
+         self.current_tool = self.TOOLS_BY_FILTER[file_dialog.get_filter()]
          self.current_tool.write(image, file_dialog.get_filename())
       file_dialog.destroy()
 
@@ -78,35 +82,6 @@ class ImageFile:
 
 
    def __detect_tool(self, filename):
-       # TODO: returning the proper tool according to filename's extension
-      self.current_tool = self.TOOLS.values()[0]
-
-
-class ReaderWriter:
-   FILTER = None
-
-   def get_filter(self):
-      return self.FILTER
-
-   def read(self, canonical_filename): pass
-   def write(self, image, canonical_filename): pass
-
-
-class PNGReaderWriter(ReaderWriter):
-   def __init__(self):
-      self.FILTER = gtk.FileFilter()
-      self.FILTER.set_name("PNG - Portable Network Graphics")
-      self.FILTER.add_mime_type("image/png")
-      self.FILTER.add_pattern("*.png")
-
-
-   def read(self, canonical_filename):
-      return (canonical_filename,
-         cairo.ImageSurface.create_from_png(canonical_filename),
-         Canvas.TRANSPARENT_IMAGE)
-
-
-   def write(self, image, canonical_filename):
-      image.write_to_png(canonical_filename)
-
+      imgtype = imghdr.what(filename)
+      self.current_tool = self.TOOLS_BY_IMGTYPE[imgtype]
 

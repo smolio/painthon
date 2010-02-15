@@ -10,6 +10,7 @@ class Canvas(gtk.DrawingArea):
    DEFAULT_CURSOR = gtk.gdk.Cursor(gtk.gdk.ARROW)
    active_tool = None
    printing_tool = False
+   image_type = 0
 
    def __init__(self):
       # Initializing superclass
@@ -19,7 +20,7 @@ class Canvas(gtk.DrawingArea):
       self.add_events(gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.BUTTON1_MOTION_MASK | gtk.gdk.DRAG_MOTION | gtk.gdk.POINTER_MOTION_MASK)
       self.connect("button-press-event", self.button_pressed)
       self.connect("button-release-event", self.button_released)
-      self.connect("motion-notify-event", self.drag_event)
+      self.connect("motion-notify-event", self.move_event)
       self.connect("expose-event", self.expose)
       self.connect("motion-notify-event", self.motion_event)
 
@@ -77,9 +78,9 @@ class Canvas(gtk.DrawingArea):
       self.active_tool.commit()
 
 
-   def drag_event(self, widget, event):
+   def move_event(self, widget, event):
       context = widget.window.cairo_create()
-      self.active_tool.drag(event.x, event.y)
+      self.active_tool.move(event.x, event.y)
       self.swap_buffers()
 
 
@@ -119,10 +120,12 @@ class Canvas(gtk.DrawingArea):
 
    def __draw_background(self, context):
       context.rectangle(0, 0, self.width, self.height)
-      #context.set_source_rgb(1, 1, 1)
-      #context.fill()
-      context.set_source(self.ALPHA_PATTERN)
-      context.paint()
+      if self.image_type == self.TRANSPARENT_IMAGE:
+         context.set_source(self.ALPHA_PATTERN)
+         context.paint()
+      else:
+         context.set_source_rgb(1, 1, 1)
+         context.fill()
 
 
    def swap_buffers(self):
@@ -140,5 +143,5 @@ class Canvas(gtk.DrawingArea):
 
 
    def set_image_type(self, image_type):
-      # TODO: specify image type (transparent or not)
-      pass
+      self.image_type = image_type
+

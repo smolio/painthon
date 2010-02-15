@@ -487,7 +487,6 @@
                     <child>
                       <object class="GtkToggleButton" id="btn-tool-eraser">
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <signal handler="change_tool_gui" name="toggled"/>
@@ -552,7 +551,6 @@
                     <child>
                       <object class="GtkToggleButton" id="btn-tool-paintbrush">
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <signal handler="change_tool_gui" name="toggled"/>
@@ -619,7 +617,6 @@
                     <child>
                       <object class="GtkToggleButton" id="btn-tool-pencil">
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <signal handler="change_tool_gui" name="toggled"/>

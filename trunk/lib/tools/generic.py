@@ -16,7 +16,7 @@ class Tool:
       self.secondary = RGBAColor(1, 1, 1)
       self.mode = self.READY
 
-   def drag(self, x, y): pass
+   def move(self, x, y): pass
 
    def select(self):
       self.canvas.window.set_cursor(self.CURSOR)
@@ -76,7 +76,7 @@ class DragAndDropTool(Tool):
       self.final_y = y
 
 
-   def drag(self, x, y):
+   def move(self, x, y):
       self.final_x = x
       self.final_y = y
 
@@ -86,7 +86,7 @@ class DragAndDropTool(Tool):
 class BothScalingTool(Tool):
    CURSOR = gtk.gdk.Cursor(gtk.gdk.BOTTOM_RIGHT_CORNER)
 
-   def drag(self, x, y):
+   def move(self, x, y):
       self.canvas.set_size(int(x), int(y))
 
 
@@ -95,7 +95,7 @@ class BothScalingTool(Tool):
 class HorizontalScalingTool(Tool):
    CURSOR = gtk.gdk.Cursor(gtk.gdk.RIGHT_SIDE)
 
-   def drag(self, x, y):
+   def move(self, x, y):
       self.canvas.set_size(int(x), self.canvas.get_height())
 
 
@@ -104,6 +104,6 @@ class HorizontalScalingTool(Tool):
 class VerticalScalingTool(Tool):
    CURSOR = gtk.gdk.Cursor(gtk.gdk.BOTTOM_SIDE)
 
-   def drag(self, x, y):
+   def move(self, x, y):
       self.canvas.set_size(self.canvas.get_width(), int(y))
 

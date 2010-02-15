@@ -123,8 +123,8 @@ class FancyCanvas(Canvas):
 
 
    def button_released(self, widget, event):
-      self.active_tool = self.previous_tool
       super(FancyCanvas, self).button_released(widget, event)
+      self.active_tool = self.previous_tool
 
 
    def motion_event(self, widget, event):
