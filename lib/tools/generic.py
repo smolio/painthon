@@ -4,21 +4,28 @@ from lib.graphics.rgbacolor import RGBAColor
 # Class
 # ==============================================================================
 class Tool:
+   READY = 0
+   DRAWING = 1
+   EDITING = 2
+
    CURSOR = gtk.gdk.Cursor(gtk.gdk.ARROW)
 
    def __init__(self, canvas):
       self.canvas = canvas
       self.primary = RGBAColor(0, 0, 0)
       self.secondary = RGBAColor(1, 1, 1)
+      self.mode = self.READY
 
    def drag(self, x, y): pass
 
    def select(self):
       self.canvas.window.set_cursor(self.CURSOR)
 
-   def begin(self, x, y): pass
+   def begin(self, x, y):
+      self.mode = self.DRAWING
 
-   def end(self, x, y): pass
+   def end(self, x, y):
+      self.mode = self.EDITING
 
    def draw(self, context): pass
 
@@ -38,6 +45,11 @@ class Tool:
    def set_secondary_color(self, color):
       self.secondary = color
 
+   def commit(self):
+      self.mode = self.DRAWING
+      self.canvas.print_tool()
+      self.mode = self.READY
+
 
 # Class 
 # ==============================================================================
@@ -51,6 +63,7 @@ class DragAndDropTool(Tool):
 
 
    def begin(self, x, y):
+      Tool.begin(self, x, y)
       self.initial_x = x
       self.initial_y = y
       self.final_x = x
@@ -58,12 +71,14 @@ class DragAndDropTool(Tool):
 
 
    def end(self, x, y):
+      Tool.end(self, x, y)
       self.final_x = x
       self.final_y = y
 
 
    def drag(self, x, y):
-      self.end(x, y)
+      self.final_x = x
+      self.final_y = y
 
 
 # Class 

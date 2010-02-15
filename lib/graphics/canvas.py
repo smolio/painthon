@@ -9,7 +9,6 @@ class Canvas(gtk.DrawingArea):
 
    DEFAULT_CURSOR = gtk.gdk.Cursor(gtk.gdk.ARROW)
    active_tool = None
-   drawing = False
    printing_tool = False
 
    def __init__(self):
@@ -17,7 +16,6 @@ class Canvas(gtk.DrawingArea):
       super(Canvas, self).__init__()
 
       # Registering events
-      #self.add_events(gtk.gdk.BUTTON_MOTION_MASK | gtk.gdk.BUTTON_PRESS | gtk.gdk.BUTTON_RELEASE)
       self.add_events(gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.BUTTON1_MOTION_MASK | gtk.gdk.DRAG_MOTION | gtk.gdk.POINTER_MOTION_MASK)
       self.connect("button-press-event", self.button_pressed)
       self.connect("button-release-event", self.button_released)
@@ -70,15 +68,13 @@ class Canvas(gtk.DrawingArea):
 
 
    def button_pressed(self, widget, event):
-      self.drawing = True
       self.active_tool.begin(event.x, event.y)
 
 
    def button_released(self, widget, event):
       self.active_tool.end(event.x, event.y)
       self.swap_buffers()
-      self.print_tool()
-      self.drawing = False
+      self.active_tool.commit()
 
 
    def drag_event(self, widget, event):
@@ -118,8 +114,7 @@ class Canvas(gtk.DrawingArea):
       context.paint()
       context.set_source(source)
 
-      if self.drawing:
-         self.active_tool.draw(context)
+      self.active_tool.draw(context)
 
 
    def __draw_background(self, context):

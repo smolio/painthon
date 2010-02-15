@@ -5,6 +5,9 @@ from generic import DragAndDropTool
 class RectangleTool(DragAndDropTool):
 
    def draw(self, context):
+      if self.mode == self.READY:
+         return
+
       w = self.final_x - self.initial_x
       h = self.final_y - self.initial_y
       context.rectangle(self.initial_x, self.initial_y, w, h)
@@ -17,6 +20,9 @@ class RectangleTool(DragAndDropTool):
 class RoundedRectangleTool(DragAndDropTool):
 
    def draw(self, context):
+      if self.mode == self.READY:
+         return
+
       w = self.final_x - self.initial_x
       h = self.final_y - self.initial_y
       context.rectangle(self.initial_x, self.initial_y, w, h)
@@ -33,6 +39,9 @@ class RoundedRectangleTool(DragAndDropTool):
 class EllipseTool(DragAndDropTool):
 
    def draw(self, context):
+      if self.mode == self.READY:
+         return
+
       w = self.final_x - self.initial_x
       h = self.final_y - self.initial_y
       context.save()

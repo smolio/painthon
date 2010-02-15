@@ -17,6 +17,7 @@ from lib.graphics.rgbacolor import RGBAColor
 from lib.io.generic import ImageFile
 from lib.tools.figures import *
 from lib.tools.generic import *
+from lib.tools.lines import *
 
 _ = gettext.gettext
  
@@ -51,6 +52,7 @@ class Painthon():
       # Defining tools
       self.TOOLS = {"btn-tool-draw-rectangle" : RectangleTool(self.CANVAS),
                     "btn-tool-draw-rounded-rectangle" : RoundedRectangleTool(self.CANVAS),
+                    "btn-tool-straight-line"   : StraightLineTool(self.CANVAS),
                     "btn-tool-draw-ellipse"   : EllipseTool(self.CANVAS) }
 
       # Set the first tool to use...
@@ -260,6 +262,9 @@ if __name__ == "__main__":
    if len(sys.argv) == 2:
       filename = sys.argv[1]
 
-   app = Painthon(os.environ['HOME'], filename)
+   default_path = os.getcwd()
+   os.chdir(os.path.dirname(sys.argv[0]))
+
+   app = Painthon(default_path, filename)
 
    gtk.main()
