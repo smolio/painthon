@@ -698,7 +698,6 @@
                     <child>
                       <widget class="GtkToggleButton" id="btn-tool-straight-line">
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <signal name="toggled" handler="change_tool_gui"/>
