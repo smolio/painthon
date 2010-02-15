@@ -16,6 +16,7 @@ from lib.graphics.fancycanvas import FancyCanvas
 from lib.graphics.rgbacolor import RGBAColor
 from lib.io.generic import ImageFile
 from lib.tools.figures import *
+from lib.tools.free import *
 from lib.tools.generic import *
 from lib.tools.lines import *
 
@@ -36,6 +37,7 @@ class Painthon():
       # Initialize canvas
       viewport = builder.get_object("viewport-for-canvas")
       self.CANVAS = FancyCanvas()
+      self.CANVAS.set_image_type(FancyCanvas.OPAQUE_IMAGE)
       viewport.add(self.CANVAS)
 
       # Load image information
@@ -50,10 +52,13 @@ class Painthon():
 
 
       # Defining tools
-      self.TOOLS = {"btn-tool-draw-rectangle" : RectangleTool(self.CANVAS),
-                    "btn-tool-draw-rounded-rectangle" : RoundedRectangleTool(self.CANVAS),
+      self.TOOLS = {"btn-tool-draw-rounded-rectangle" : RoundedRectangleTool(self.CANVAS),
+                    "btn-tool-draw-rectangle"  : RectangleTool(self.CANVAS),
                     "btn-tool-straight-line"   : StraightLineTool(self.CANVAS),
-                    "btn-tool-draw-ellipse"   : EllipseTool(self.CANVAS) }
+                    "btn-tool-pencil"          : PencilTool(self.CANVAS),
+                    "btn-tool-paintbrush"      : PaintbrushTool(self.CANVAS),
+                    "btn-tool-eraser"          : EraserTool(self.CANVAS),
+                    "btn-tool-draw-ellipse"    : EllipseTool(self.CANVAS) }
 
       # Set the first tool to use...
       # TODO: select the proper default tool
@@ -224,6 +229,9 @@ class Painthon():
 
 
    def __set_current_info(self, image_info):
+      if image_info == None:
+         return
+
       canonical_filename = image_info[0]
       self.CANVAS.set_image(image_info[1])
       self.CANVAS.set_image_type(image_info[2])
@@ -231,6 +239,9 @@ class Painthon():
 
 
    def __fix_image_info(self, canonical_filename):
+      if canonical_filename == None:
+         return
+
       self.filename = os.path.basename(canonical_filename)
       self.path = os.path.dirname(canonical_filename)
       self.update_title()
