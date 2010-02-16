@@ -55,6 +55,7 @@ class EllipseTool(DragAndDropTool):
          context.fill_preserve()
          context.restore()
          self.use_primary_color(context)
+         context.set_antialias(cairo.ANTIALIAS_NONE)
          context.stroke()
       except cairo.Error:
          pass
