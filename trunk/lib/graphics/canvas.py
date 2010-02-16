@@ -1,6 +1,7 @@
 import cairo
 import gtk
 import math
+
 from lib.tools.generic import *
 
 class Canvas(gtk.DrawingArea):
@@ -105,6 +106,9 @@ class Canvas(gtk.DrawingArea):
 
       # Drawing the background
       if not self.printing_tool:
+         self.__draw_background(context)
+
+      if self.image_type == self.OPAQUE_IMAGE and self.printing_tool:
          self.__draw_background(context)
 
       # Draw the result
