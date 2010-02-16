@@ -464,7 +464,6 @@
                     <child>
                       <object class="GtkToggleButton" id="btn-tool-bucket-fill">
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <signal handler="change_tool_gui" name="toggled"/>
@@ -507,7 +506,6 @@
                     <child>
                       <object class="GtkToggleButton" id="btn-tool-color-picker">
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <signal handler="change_tool_gui" name="toggled"/>

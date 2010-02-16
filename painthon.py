@@ -19,6 +19,7 @@ from lib.tools.figures import *
 from lib.tools.free import *
 from lib.tools.generic import *
 from lib.tools.lines import *
+from lib.tools.spots import *
 
 _ = gettext.gettext
  
@@ -57,7 +58,9 @@ class Painthon():
                     "btn-tool-straight-line"   : StraightLineTool(self.CANVAS),
                     "btn-tool-pencil"          : PencilTool(self.CANVAS),
                     "btn-tool-paintbrush"      : PaintbrushTool(self.CANVAS),
+                    "btn-tool-bucket-fill"     : BucketFillTool(self.CANVAS),
                     "btn-tool-eraser"          : EraserTool(self.CANVAS),
+                    "btn-tool-color-picker"    : ColorPickerTool(self.CANVAS),
                     "btn-tool-draw-ellipse"    : EllipseTool(self.CANVAS) }
 
       # Set the first tool to use...
