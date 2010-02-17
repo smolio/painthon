@@ -36,49 +36,42 @@ class BucketFillTool(Tool):
       replacement_color = (int(pc.get_blue()*255), int(pc.get_green()*255),
                            int(pc.get_red()*255), int(pc.get_alpha()*255))
 
-      self.__flood_fill((x,y), pixels, replacement_color, target_color)
+      self.__flood_fill(x, y, pixels, replacement_color, target_color)
 
       surface = ImageUtils.create_surface_from_image(image)
       self.canvas.set_image(surface)
       self.canvas.swap_buffers()
 
-   def __flood_fill(self, point, pixels, replacement, target):
-      stack = list()
-      stack.append(point)
+   def __flood_fill(self, x, y, pixels, replacement, target):
+      edge = [(x, y)]
+      pixels[x, y] = (replacement[0], replacement[1], replacement[2], 255)
 
-      while len(stack) > 0:
-         cur_pix = stack.pop()
-         cur_col = pixels[cur_pix[0], cur_pix[1]]
+      while edge:
+         newedge = []
+         for (x, y) in edge:
+            for (s, t) in ((x+1, y), (x-1, y), (x, y+1), (x, y-1)):
+               if self.__within_image(s, t):
+                  alpha = self.__compare(pixels[s, t], target)
+                  if alpha != 0:
+                     result = self.__mix_colors(pixels[s, t], replacement, alpha)
+                     pixels[s, t] = result
+                     newedge.append((s, t))
+         edge = newedge
 
-         if cur_col[0:3] == replacement[0:3]:
-            continue
 
-         alpha = self.__compare(cur_col[0:3], target[0:3])
-         if alpha != 0:
-            res = self.__mix_colors(cur_col[0:3], replacement[0:3], alpha)
-            pixels[cur_pix[0], cur_pix[1]] = res
+   def __within_image(self, x, y):
+      if 0 <= x < self.canvas.get_width() and \
+         0 <= y < self.canvas.get_height():
+         return True
+      return False
 
-            # North:
-            if cur_pix[1] >= 1:
-               stack.append((cur_pix[0], cur_pix[1]-1))
-
-            # South:
-            if cur_pix[1] < self.canvas.get_height()-1:
-               stack.append((cur_pix[0], cur_pix[1]+1))
-
-            # West:
-            if cur_pix[0] >= 1:
-               stack.append((cur_pix[0]-1, cur_pix[1]))
-
-            # East:
-            if cur_pix[0] < self.canvas.get_width()-1:
-               stack.append((cur_pix[0]+1, cur_pix[1]))
 
    def __compare(self, current, replacement):
       if current == replacement:
          return 255
       else:
          return 0
+
 
    def __mix_colors(self, current, replacement, alpha):
       calpha = (255-alpha)/255.0
@@ -89,3 +82,5 @@ class BucketFillTool(Tool):
       red = current[2]*calpha + replacement[2]*ralpha
 
       return (blue, green, red, 255)
+
+
