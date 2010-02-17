@@ -2,6 +2,8 @@ from lib.graphics.imageutils import ImageUtils
 from generic import Tool
 from generic import DragAndDropTool
 
+import time
+
 class ColorPickerTool(DragAndDropTool):
    pixels = None
 
@@ -43,9 +45,13 @@ class BucketFillTool(Tool):
       self.canvas.swap_buffers()
 
    def __flood_fill(self, x, y, pixels, replacement, target):
+      if self.__compare(pixels[x, y], replacement) == 255:
+         return
+
       edge = [(x, y)]
       pixels[x, y] = (replacement[0], replacement[1], replacement[2], 255)
 
+      start = time.time()
       while edge:
          newedge = []
          for (x, y) in edge:
@@ -58,6 +64,9 @@ class BucketFillTool(Tool):
                      newedge.append((s, t))
          edge = newedge
 
+      end = time.time()
+      print "Required time for (" + str(self.canvas.get_width()) + ", " + str(self.canvas.get_height()) + ") is " + str(end - start)
+
 
    def __within_image(self, x, y):
       if 0 <= x < self.canvas.get_width() and \
@@ -66,8 +75,8 @@ class BucketFillTool(Tool):
       return False
 
 
-   def __compare(self, current, replacement):
-      if current == replacement:
+   def __compare(self, current, target):
+      if current == target:
          return 255
       else:
          return 0
@@ -81,6 +90,6 @@ class BucketFillTool(Tool):
       green = current[1]*calpha + replacement[1]*ralpha
       red = current[2]*calpha + replacement[2]*ralpha
 
-      return (blue, green, red, 255)
+      return (int(blue), int(green), int(red), 255)
 
 
