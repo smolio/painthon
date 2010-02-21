@@ -9,7 +9,7 @@ class FloodFillAlgorithm:
    def execute(x, y, image, width, height, bpc, replacement):
       ireplacement = FloodFillAlgorithm.color_to_int(replacement)
 
-      lib="/home/dvd/painthon/lib/c/floodfill.so"
+      lib="/home/daguilera/Programs/dev/svn/painthon/lib/c/floodfill.so"
       dll = cdll.LoadLibrary(lib)
       function = (lambda x, y, image, width, height, bpc, ireplacement: \
          dll.floodfill( \
