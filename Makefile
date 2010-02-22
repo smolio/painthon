@@ -2,14 +2,14 @@ GCC=gcc
 LD=ld
 LIBS=
 
-painthon: painthon.xml floodfill.so
+painthon: lib/gui/painthon.xml floodfill.so
 
-painthon.xml: painthon.glade
-	@gtk-builder-convert painthon.glade painthon.xml
-	@cat painthon.xml | sed -e "s/buf\">/buf\">icons\//" > /tmp/painthon.xml
-	@mv /tmp/painthon.xml painthon.xml
-	@cat painthon.xml | sed -e "s/icon\">painthon.svg/icon\">pixmaps\/painthon.svg/" > /tmp/painthon.xml
-	@mv /tmp/painthon.xml painthon.xml
+lib/gui/painthon.xml: lib/gui/painthon.glade
+	@gtk-builder-convert lib/gui/painthon.glade lib/gui/painthon.xml
+	@cat lib/gui/painthon.xml | sed -e "s/buf\">/buf\">icons\//" > /tmp/painthon.xml
+	@mv /tmp/painthon.xml lib/gui/painthon.xml
+	@cat lib/gui/painthon.xml | sed -e "s/icon\">painthon.svg/icon\">icons\/painthon.svg/" > /tmp/painthon.xml
+	@mv /tmp/painthon.xml lib/gui/painthon.xml
 
 floodfill.so: ./lib/c/floodfill.o
 	$(LD) -shared -soname $@ -o ./lib/c/$@ -lc ./lib/c/floodfill.o
