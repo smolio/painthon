@@ -5,15 +5,11 @@ import pygtk
 pygtk.require("2.0")
 import gtk
 import gettext
-import math
-import cairo
 import os
 import sys
 
-from lib.misc.hsvgenerator import HSVGenerator
-from lib.graphics.colorcell import ColorCell
+from lib.gui.painthongui import GUI
 from lib.graphics.fancycanvas import FancyCanvas
-from lib.graphics.rgbacolor import RGBAColor
 from lib.io.generic import ImageFile
 from lib.tools.figures import *
 from lib.tools.free import *
@@ -24,209 +20,95 @@ from lib.tools.spots import *
 _ = gettext.gettext
  
 class Painthon():
+   CANVAS = None
+   READWRITE = None
+
+   filename = None
+   path = None
+
+   primary = None
+   secondary = None
 
    def __init__(self, path, image_filename=None):
-      builder = gtk.Builder()
-      builder.add_from_file("painthon.xml")
-
-      # Get the window properly
-      self.window = builder.get_object("main-window")
-
-      # Reader and Writer Tools
-      self.READWRITE = ImageFile()
 
       # Initialize canvas
-      viewport = builder.get_object("viewport-for-canvas")
       self.CANVAS = FancyCanvas()
       self.CANVAS.set_image_type(FancyCanvas.OPAQUE_IMAGE)
-      viewport.add(self.CANVAS)
+
+      # Initialize readers/writers
+      self.READWRITE = ImageFile()
 
       # Load image information
-      self.is_modified = False
       if image_filename != None:
          info = self.READWRITE.read(os.path.abspath(image_filename))
          self.__set_current_info(info)
       else:
          self.filename = None
-         self.update_title()
          self.path = path
 
-
+      # Initialize colors
+      self.primary = RGBAColor(0, 0, 0, 1)
+      self.secondary = RGBAColor(1, 1, 1, 1)
+      
       # Defining tools
-      self.TOOLS = {"btn-tool-draw-rounded-rectangle" : RoundedRectangleTool(self.CANVAS),
-                    "btn-tool-draw-rectangle"  : RectangleTool(self.CANVAS),
-                    "btn-tool-straight-line"   : StraightLineTool(self.CANVAS),
-                    "btn-tool-pencil"          : PencilTool(self.CANVAS),
-                    "btn-tool-paintbrush"      : PaintbrushTool(self.CANVAS),
-                    "btn-tool-bucket-fill"     : BucketFillTool(self.CANVAS),
-                    "btn-tool-eraser"          : EraserTool(self.CANVAS),
-                    "btn-tool-color-picker"    : ColorPickerTool(self.CANVAS),
-                    "btn-tool-draw-ellipse"    : EllipseTool(self.CANVAS) }
-
-      # Set the first tool to use...
-      # TODO: select the proper default tool
-      #self.active_tool_button = builder.get_object("btn-tool-free-select")
-      self.active_tool_button = builder.get_object("btn-tool-draw-rectangle")
-      self.active_tool_button.set_active(True)
-      self.CANVAS.set_active_tool(self.TOOLS[self.active_tool_button.get_name()])
-
-      # Get the toolbar and set it not to show text
-      self.toolbar = builder.get_object("toolbar")
-      self.toolbar.set_style(gtk.TOOLBAR_ICONS)
-
-      # Initialize palette
-      self.__init_colors(builder.get_object("colors-grid"))
-
-      # Initialize working colors
-      self.primary = ColorCell(0, 0, 0)
-      self.primary.connect("button-release-event", self.color_changed)
-      primary_frame = builder.get_object("primary-color")
-      primary_frame.add(self.primary)
-      self.secondary = ColorCell(1, 1, 1)
-      self.secondary.connect("button-release-event", self.color_changed)
-      secondary_frame = builder.get_object("secondary-color")
-      secondary_frame.add(self.secondary)
-
-      # Fix alpha sliders
-      a1 = builder.get_object("primary-color-alpha")
-      a1.set_value(a1.get_value())
-      self.MAX_ALPHA_1 = a1.get_value()
-      a2 = builder.get_object("secondary-color-alpha")
-      a2.set_value(a2.get_value())
-      self.MAX_ALPHA_2 = a2.get_value()
-
-      # Connecting signals properly...
-      builder.connect_signals(self)
-
-      # Show the window
-      self.window.show_all()
+      self.TOOLS = {"draw-rounded-rectangle" : RoundedRectangleTool(self.CANVAS),
+                    "draw-rectangle"  : RectangleTool(self.CANVAS),
+                    "straight-line"   : StraightLineTool(self.CANVAS),
+                    "pencil"          : PencilTool(self.CANVAS),
+                    "paintbrush"      : PaintbrushTool(self.CANVAS),
+                    "bucket-fill"     : BucketFillTool(self.CANVAS),
+                    "eraser"          : EraserTool(self.CANVAS),
+                    "color-picker"    : ColorPickerTool(self.CANVAS),
+                    "draw-ellipse"    : EllipseTool(self.CANVAS) }
 
 
-   def update_title(self):
-      if self.filename == None:
-         name = _("unknown")
-      else:
-         name = self.filename
-
-      if self.is_modified:
-         self.window.set_title("*" + name + " - Painthon")
-      else:
-         self.window.set_title(name + " - Painthon")
-
-
-   def __init_colors(self, colorsgrid):
-      colors = colorsgrid.get_children()
-      rows = colorsgrid.get_property("n-rows")
-      columns = colorsgrid.get_property("n-columns")
-
-      # Color[0][0]
-      color_frame = colors[0]
-      colorcell = ColorCell(0, 0, 0)
-      colorcell.connect("button-release-event", self.color_changed)
-      color_frame.add(colorcell)
-      # Color[0][1]
-      color_frame = colors[columns]
-      colorcell = ColorCell(1, 1, 1)
-      colorcell.connect("button-release-event", self.color_changed)
-      color_frame.add(colorcell)
-
-      # Color[1][0]
-      color_frame = colors[1]
-      colorcell = ColorCell(0.33, 0.33, 0.33)
-      colorcell.connect("button-release-event", self.color_changed)
-      color_frame.add(colorcell)
-      # Color[1][1]
-      color_frame = colors[columns + 1]
-      colorcell = ColorCell(0.66, 0.66, 0.66)
-      colorcell.connect("button-release-event", self.color_changed)
-      color_frame.add(colorcell)
-
-      hsv = HSVGenerator()
-
-      # The other colors
-      for i in range(rows):
-         for j in range(2, columns):
-            # Each cell is: frame{ eventbox{label} }
-            color_frame = colors[i*columns + j]
-            color = hsv.get_hsv_color(360*(j-2)/(columns-2), 1.0-0.7*i, 1.0)
-            colorcell = ColorCell()
-            colorcell.connect("button-release-event", self.color_changed)
-            colorcell.set_color(RGBAColor.create_from_gtk_color(color))
-            color_frame.add(colorcell)
-
-
-   def quit(self, window, data=None):
+   def quit(self, main_window):
+      if self.is_modified():
+         warning = gtk.MessageDialog(main_window, gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_WARNING, gtk.BUTTONS_OK, "TODO")
+         a = warning.run()
+         warning.destroy()
       gtk.main_quit()
 
 
-   def color_changed(self, widget, event):
-      c = widget.get_color()
-      if event.button == 1:
-         c.set_alpha(self.primary.get_color().get_alpha())
-         self.__set_primary_color_to(c)
-      elif event.button == 3:
-         c.set_alpha(self.secondary.get_color().get_alpha())
-         self.__set_secondary_color_to(c)
+   def change_tool(self, toolname):
+      self.CANVAS.set_active_tool(self.TOOLS[toolname])
 
 
-   def change_tool_gui(self, newtool, data=None):
-      if newtool.get_active():
-          prevtool = self.active_tool_button
-          if newtool != prevtool:
-              self.active_tool_button = newtool
-              prevtool.set_active(False)
-              self.change_tool(newtool)
-
-      else:
-          if newtool == self.active_tool_button:
-              newtool.set_active(True);
-
-
-   def change_tool(self, tool):
-      self.CANVAS.set_active_tool(self.TOOLS[tool.get_name()])
-
-
-   def change_primary_alpha(self, slider):
-      c = self.primary.get_color()
-      value = slider.get_value()/self.MAX_ALPHA_1
-      c.set_alpha(value)
-      self.__set_primary_color_to(c)
-
-
-   def change_secondary_alpha(self, slider):
-      c = self.secondary.get_color()
-      value = slider.get_value()/self.MAX_ALPHA_2
-      c.set_alpha(value)
-      self.__set_secondary_color_to(c)
-
-
-   def __set_primary_color_to(self, c):
-      self.primary.set_color(c)
+   def set_primary_color(self, c):
+      self.primary = c
       for tool in self.TOOLS.values():
          tool.set_primary_color(c)
 
 
-   def __set_secondary_color_to(self, c):
-      self.secondary.set_color(c)
+   def set_secondary_color(self, c):
+      self.secondary = c
       for tool in self.TOOLS.values():
          tool.set_secondary_color(c)
 
 
-   def new(self, widget):
-      print widget.get_name()
+   def get_primary_color(self):
+      return self.primary
 
 
-   def open(self, widget):
+   def get_secondary_color(self):
+      return self.secondary
+
+
+   def new(self):
+      print "new"
+
+
+   def open(self):
       info = self.READWRITE.open(self.path)
       self.__set_current_info(info)
 
 
-   def save(self, widget):
+   def save(self):
       canonical_filename = self.READWRITE.save(self.CANVAS.get_image(), self.path, self.filename)
       self.__fix_image_info(canonical_filename)
 
 
-   def save_as(self, widget):
+   def save_as(self):
       canonical_filename = self.READWRITE.save_as(self.CANVAS.get_image(), self.path, self.filename)
       self.__fix_image_info(canonical_filename)
 
@@ -247,27 +129,34 @@ class Painthon():
 
       self.filename = os.path.basename(canonical_filename)
       self.path = os.path.dirname(canonical_filename)
-      self.update_title()
 
 
-   def cut(self, widget):
-      print widget.get_name()
+   def cut(self):
+      print "cut"
 
 
-   def copy(self, widget):
-      print widget.get_name()
+   def copy(self):
+      print "copy"
 
 
-   def paste(self, widget):
-      print widget.get_name()
+   def paste(self):
+      print "paste"
 
 
-   def redo(self, widget):
-      print widget.get_name()
+   def redo(self):
+      print "redo"
 
 
-   def undo(self, widget):
-      print widget.get_name()
+   def undo(self):
+      print "undo"
+
+
+   def is_modified(self):
+      # TODO: return the proper result... ;-)
+      return False
+
+   def get_canvas(self):
+      return self.CANVAS
 
 
 
@@ -280,5 +169,6 @@ if __name__ == "__main__":
    os.chdir(os.path.dirname(sys.argv[0]))
 
    app = Painthon(default_path, filename)
+   gui = GUI(app)
 
    gtk.main()
