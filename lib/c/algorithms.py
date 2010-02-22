@@ -1,3 +1,5 @@
+import sys
+import os
 from ctypes import cdll
 from ctypes import c_char_p
 from ctypes import c_int
@@ -9,7 +11,7 @@ class FloodFillAlgorithm:
    def execute(x, y, image, width, height, bpc, replacement):
       ireplacement = FloodFillAlgorithm.color_to_int(replacement)
 
-      lib="/home/daguilera/Programs/dev/svn/painthon/lib/c/floodfill.so"
+      lib=os.path.dirname(sys.argv[0]) + "/lib/c/floodfill.so"
       dll = cdll.LoadLibrary(lib)
       function = (lambda x, y, image, width, height, bpc, ireplacement: \
          dll.floodfill( \
