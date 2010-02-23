@@ -37,7 +37,7 @@ int floodfill(int x, int y, char image[], int w, int h, int bpc, int ireplacemen
    // Target color
    color target = getColor(getIndex(x, y, w, bpc), image, bpc);
 
-   if (compareUsingColor(target, replacement) == 0xff)
+   if (compareUsingColor(target, replacement) == (char)0xff)
       return 0;
 
    // Creating the list/stack
@@ -56,7 +56,7 @@ int floodfill(int x, int y, char image[], int w, int h, int bpc, int ireplacemen
       int index = getIndex(current.x, current.y, w, bpc);
       color current_color = getColor(index, image, bpc);
       int blending_alpha = compareUsingColor(current_color, target);
-      if (blending_alpha != 0) {
+      if (blending_alpha != (char)0) {
          color result = blend(current_color, replacement, blending_alpha);
          image[index] = result.red;
          image[index + 1] = result.green;
