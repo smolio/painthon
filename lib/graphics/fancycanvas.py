@@ -143,34 +143,33 @@ class FancyCanvas(Canvas):
       disp = 2
       csw = self.BL_CORNER_SHADOW.get_width()
 
-      # Bottom left corner
       if self.width > 10:
+         # Bottom left corner
          context.set_source_surface(self.BL_CORNER_SHADOW, disp, self.height)
          context.paint()
 
-      # Top right corner
+         # Bottom shadow
+         context.translate(0, self.height)
+         for i in range(len(self.side_alpha_channels)):
+            alpha = self.side_alpha_channels[i]
+            context.rectangle(disp+csw, i, self.width-disp-csw, 1)
+            context.set_source_rgba(0, 0, 0, alpha)
+            context.fill()
+         context.translate(0, -self.height)
+
       if self.height > 10:
+         # Top right corner
          context.set_source_surface(self.TR_CORNER_SHADOW, self.width, disp)
          context.paint()
 
-      # Bottom shadow
-      context.translate(0, self.height)
-      for i in range(len(self.side_alpha_channels)):
-         alpha = self.side_alpha_channels[i]
-         context.rectangle(disp+csw, i, self.width-disp-csw, 1)
-         context.set_source_rgba(0, 0, 0, alpha)
-         context.fill()
-      context.translate(0, -self.height)
-
-
-      # Side shadow
-      context.translate(self.width, 0)
-      for i in range(len(self.side_alpha_channels)):
-         alpha = self.side_alpha_channels[i]
-         context.rectangle(i, disp+csw, 1, self.height-disp-csw)
-         context.set_source_rgba(0, 0, 0, alpha)
-         context.fill()
-      context.translate(-self.width, 0)
+         # Side shadow
+         context.translate(self.width, 0)
+         for i in range(len(self.side_alpha_channels)):
+            alpha = self.side_alpha_channels[i]
+            context.rectangle(i, disp+csw, 1, self.height-disp-csw)
+            context.set_source_rgba(0, 0, 0, alpha)
+            context.fill()
+         context.translate(-self.width, 0)
 
 
    def __draw_scaling_points(self, context):
