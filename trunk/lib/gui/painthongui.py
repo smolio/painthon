@@ -51,11 +51,13 @@ class GUI():
 
       # Initialize working colors
       self.primary = ColorCell(0, 0, 0)
-      self.primary.connect("button-release-event", self.color_changed)
+      self.primary.enable_scroll_to_modify_alpha()
+      self.primary.connect("color-changed-event", self.color_changed)
       primary_frame = builder.get_object("primary-color")
       primary_frame.add(self.primary)
       self.secondary = ColorCell(1, 1, 1)
-      self.secondary.connect("button-release-event", self.color_changed)
+      self.secondary.enable_scroll_to_modify_alpha()
+      self.secondary.connect("color-changed-event", self.color_changed)
       secondary_frame = builder.get_object("secondary-color")
       secondary_frame.add(self.secondary)
 
@@ -82,23 +84,23 @@ class GUI():
       # Color[0][0]
       color_frame = colors[0]
       colorcell = ColorCell(0, 0, 0)
-      colorcell.connect("button-release-event", self.color_changed)
+      colorcell.connect("color-changed-event", self.color_changed)
       color_frame.add(colorcell)
       # Color[0][1]
       color_frame = colors[columns]
       colorcell = ColorCell(1, 1, 1)
-      colorcell.connect("button-release-event", self.color_changed)
+      colorcell.connect("color-changed-event", self.color_changed)
       color_frame.add(colorcell)
 
       # Color[1][0]
       color_frame = colors[1]
       colorcell = ColorCell(0.33, 0.33, 0.33)
-      colorcell.connect("button-release-event", self.color_changed)
+      colorcell.connect("color-changed-event", self.color_changed)
       color_frame.add(colorcell)
       # Color[1][1]
       color_frame = colors[columns + 1]
       colorcell = ColorCell(0.66, 0.66, 0.66)
-      colorcell.connect("button-release-event", self.color_changed)
+      colorcell.connect("color-changed-event", self.color_changed)
       color_frame.add(colorcell)
 
       hsv = HSVGenerator()
@@ -110,7 +112,7 @@ class GUI():
             color_frame = colors[i*columns + j]
             color = hsv.get_hsv_color(360*(j-2)/(columns-2), 1.0-0.7*i, 1.0)
             colorcell = ColorCell()
-            colorcell.connect("button-release-event", self.color_changed)
+            colorcell.connect("color-changed-event", self.color_changed)
             colorcell.set_color(RGBAColor.create_from_gtk_color(color))
             color_frame.add(colorcell)
 
