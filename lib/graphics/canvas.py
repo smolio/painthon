@@ -40,7 +40,6 @@ class Canvas(gtk.DrawingArea):
 
    def reset(self, context):
       # Clipping to draw area
-      context.reset_clip()
       context.rectangle(0, 0, self.width, self.height)
       context.clip()
 

@@ -140,7 +140,7 @@ class GUI():
               self.active_tool_button = newtool
               if prevtool != None:
                  prevtool.set_active(False)
-              self.PAINTHON.change_tool(newtool.get_name().replace("btn-tool-", ""))
+              self.PAINTHON.change_tool(gtk.Buildable.get_name(newtool).replace("btn-tool-", ""))
 
 
    def change_primary_alpha(self, slider):
