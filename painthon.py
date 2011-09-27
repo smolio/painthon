@@ -166,7 +166,7 @@ if __name__ == "__main__":
       filename = sys.argv[1]
 
    default_path = os.getcwd()
-   os.chdir(os.path.dirname(sys.argv[0]))
+   os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
    app = Painthon(default_path, filename)
    gui = GUI(app)

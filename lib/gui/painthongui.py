@@ -25,7 +25,7 @@ class GUI():
       self.PAINTHON = painthon
 
       builder = gtk.Builder()
-      builder.add_from_file(os.path.dirname(sys.argv[0]) + "/lib/gui/painthon.xml")
+      builder.add_from_file(os.path.join(os.path.dirname( os.path.realpath( __file__ ) ) + os.sep + "painthon.xml"))
 
       # Get the window properly
       self.window = builder.get_object("main-window")

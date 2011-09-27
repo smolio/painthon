@@ -11,11 +11,9 @@ lib/gui/painthon.xml: lib/gui/painthon.glade
 	@cat lib/gui/painthon.xml | sed -e "s/icon\">painthon.svg/icon\">icons\/painthon.svg/" > /tmp/painthon.xml
 	@mv /tmp/painthon.xml lib/gui/painthon.xml
 
-floodfill.so: ./lib/c/floodfill.o
-	$(LD) -shared -soname $@ -o ./lib/c/$@ -lc ./lib/c/floodfill.o
-
-floodfill.o: ./lib/c/floodfill.c
-	$(GCC) -fPIC $(LIBS) -o ./lib/c/floodfill.o -c ./lib/c/floodfill.c
+floodfill.so: ./lib/c/floodfill.c
+	$(GCC) $(LIBS) -c -fPIC -o ./lib/c/floodfill.o ./lib/c/floodfill.c
+	$(LD) -shared -o ./lib/c/floodfill.so -lc ./lib/c/floodfill.o
 
 clean:
 	@rm -f painthon.xml ./lib/c/floodfill.o ./lib/c/floodfill.so
